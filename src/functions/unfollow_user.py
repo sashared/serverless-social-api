@@ -6,10 +6,19 @@ import botocore
 
 import api_responses
 
+
+USER_TABLE_NAME = os.environ['DYNAMODB_USER_TABLE']
+USER_FOLLOWING_TABLE_NAME = os.environ['DYNAMODB_USERFOLLOWING_TABLE']
+ERROR_MESSAGE = 'An error occured when trying to follow user'
+NO_USER_WITH_CURRENT_USER_ID_ERROR_MESSAGE = 'No user with given current user id'
+NO_USER_WITH_ANOTHER_USER_ID_ERROR_MESSAGE = 'No user with given another user id'
+NOT_FOLLOWING_ERROR_MESSAGE = 'Not following anyway!'
+
+
 def unfollow_user(event, context):
     dynamodb = boto3.resource('dynamodb')
-    user_following_table = dynamodb.Table(os.environ['DYNAMODB_USERFOLLOWING_TABLE'])
-    user_table = dynamodb.Table(os.environ['DYNAMODB_USER_TABLE'])
+    user_following_table = dynamodb.Table(USER_FOLLOWING_TABLE_NAME)
+    user_table = dynamodb.Table(USER_TABLE_NAME)
     data = json.loads(event['body'])
     current_user_uuid = data['current_user_uuid']
     another_user_uuid = data['another_user_uuid']
@@ -21,7 +30,7 @@ def unfollow_user(event, context):
             }
         )
         if 'Item' not in current_user:
-            return api_responses.get_error_response(400, 'No user with given current user id')
+            return api_responses.get_error_response(400, NO_USER_WITH_CURRENT_USER_ID_ERROR_MESSAGE)
         
         another_user = user_table.get_item(
             Key={
@@ -29,7 +38,7 @@ def unfollow_user(event, context):
             }
         )
         if 'Item' not in another_user:
-            return api_responses.get_error_response(400, 'No user with given another user id')
+            return api_responses.get_error_response(400, NO_USER_WITH_ANOTHER_USER_ID_ERROR_MESSAGE)
 
         user = user_following_table.get_item(
             Key={
@@ -38,7 +47,7 @@ def unfollow_user(event, context):
             }
         )
         if 'Item' not in user:
-            return api_responses.get_error_response(400, 'Not following anyway!')
+            return api_responses.get_error_response(400, NOT_FOLLOWING_ERROR_MESSAGE)
 
         user_following_table.delete_item(
             Key={
@@ -48,8 +57,7 @@ def unfollow_user(event, context):
         )        
         return api_responses.get_success_response(204)
     except botocore.exceptions.ClientError as error:
-        error_message = 'An error occured when trying to unfollow user'
-        print(error_message)
+        print(ERROR_MESSAGE)
         print(str(error))
-        return api_responses.get_error_response(500, error_message)
+        return api_responses.get_error_response(500, ERROR_MESSAGE)
 

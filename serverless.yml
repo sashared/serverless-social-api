@@ -1,15 +1,15 @@
-custom:
-  dynamodb:
-    userTable: ${self:service}-user-${self:provider.stage}
-    postTable: ${self:service}-post-${self:provider.stage}
-    userFollowingTable: ${self:service}-userFollowing-${self:provider.stage}
+frameworkVersion: '>=1.1.0 <2.0.0'
 
 service: user-service
 # app and org for use with dashboard.serverless.com
 app: serverless-social-api
 org: alekred
 
-frameworkVersion: '>=1.1.0 <2.0.0'
+custom:
+  dynamodb:
+    userTable: ${self:service}-user-${self:provider.stage}
+    postTable: ${self:service}-post-${self:provider.stage}
+    userFollowingTable: ${self:service}-userFollowing-${self:provider.stage}
 
 provider:
   name: aws

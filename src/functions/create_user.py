@@ -7,9 +7,14 @@ import botocore
 
 import api_responses
 
+
+USER_TABLE_NAME = os.environ['DYNAMODB_USER_TABLE']
+ERROR_MESSAGE = 'An error occured when saving the user to the database'
+
+
 def create_user(event, context):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(os.environ['DYNAMODB_USER_TABLE'])
+    table = dynamodb.Table(USER_TABLE_NAME)
     data = json.loads(event['body'])
     user_uuid = str(uuid.uuid4())
     name = data['name']
@@ -27,7 +32,6 @@ def create_user(event, context):
         )
         return api_responses.get_success_response(201, user_uuid)
     except botocore.exceptions.ClientError as error:
-        error_message = 'An error occured when saving the user to the database'
-        print(error_message)
+        print(ERROR_MESSAGE)
         print(str(error))
-        return api_responses.get_error_response(500, error_message)
+        return api_responses.get_error_response(500, ERROR_MESSAGE)

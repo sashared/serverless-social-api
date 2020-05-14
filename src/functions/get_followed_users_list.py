@@ -8,13 +8,22 @@ from boto3.dynamodb.conditions import Key
 
 import api_responses
 
+
+USER_TABLE_NAME = os.environ['DYNAMODB_USER_TABLE']
+USER_FOLLOWING_TABLE_NAME = os.environ['DYNAMODB_USERFOLLOWING_TABLE']
+ERROR_MESSAGE = 'An error occured when trying to get followed users list'
+NO_USER_WITH_SUCH_ID_ERROR_MESSAGE = 'No user with given user id'
+NOT_A_VALID_UUID = 'Url parameter is not a valid uuid'
+UUID_MATCH_REGEX = r'[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}'
+
+
 def get_followed_users_list(event, context):
     dynamodb = boto3.resource('dynamodb')
-    user_following_table = dynamodb.Table(os.environ['DYNAMODB_USERFOLLOWING_TABLE'])
-    user_table = dynamodb.Table(os.environ['DYNAMODB_USER_TABLE']) 
+    user_following_table = dynamodb.Table(USER_FOLLOWING_TABLE_NAME)
+    user_table = dynamodb.Table(USER_TABLE_NAME) 
     user_uuid = event['pathParameters']['user_uuid']
-    if not re.match(r'[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}', user_uuid):
-        return api_responses.get_error_response(404, 'Url parameter is not a valid uuid')
+    if not re.match(UUID_MATCH_REGEX, user_uuid):
+        return api_responses.get_error_response(400, NOT_A_VALID_UUID)
 
     try:
         user = user_table.get_item(
@@ -23,7 +32,7 @@ def get_followed_users_list(event, context):
             }
         )
         if 'Item' not in user:
-            return api_responses.get_error_response(400, 'No user with such id')
+            return api_responses.get_error_response(400, NO_USER_WITH_SUCH_ID_ERROR_MESSAGE)
 
         followed_users = user_following_table.query(
             KeyConditionExpression=Key('follower_uuid').eq(user_uuid)
@@ -35,7 +44,6 @@ def get_followed_users_list(event, context):
         return api_responses.get_success_response(200, json.dumps(users_uuids))
 
     except botocore.exceptions.ClientError as error:
-        error_message = 'An error occured when trying to get followed users list'
-        print(error_message)
+        print(ERROR_MESSAGE)
         print(str(error))
-        return api_responses.get_error_response(500, error_message)
+        return api_responses.get_error_response(500, ERROR_MESSAGE)
