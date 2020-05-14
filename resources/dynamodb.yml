@@ -1,0 +1,45 @@
+Resources:
+  userTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ${self:custom.dynamodb.userTable}
+      AttributeDefinitions:
+        - AttributeName: 'user_uuid'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'user_uuid'
+          KeyType: HASH
+      BillingMode: PAY_PER_REQUEST
+  postTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ${self:custom.dynamodb.postTable}
+      AttributeDefinitions:
+        - AttributeName: 'user_uuid'
+          AttributeType: 'S'
+        - AttributeName: 'post_id'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'user_uuid'
+          KeyType: HASH
+        - AttributeName: 'post_id'
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+  userFollowingTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    Properties:
+      TableName: ${self:custom.dynamodb.userFollowingTable}
+      AttributeDefinitions:
+        - AttributeName: 'follower_uuid'
+          AttributeType: 'S'
+        - AttributeName: 'followed_uuid'
+          AttributeType: 'S'
+      KeySchema:
+        - AttributeName: 'follower_uuid'
+          KeyType: HASH
+        - AttributeName: 'followed_uuid'
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST 

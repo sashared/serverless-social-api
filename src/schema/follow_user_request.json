@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Follow User Schema",
+    "type": "object",
+    "required": [
+        "current_user_uuid", 
+        "another_user_uuid"
+    ],
+    "properties": {
+        "current_user_uuid": {
+            "description": "Id of the current user",
+            "type": "string",
+            "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
+        },
+        "another_user_uuid": {
+            "description": "Id of the user to follow",
+            "type": "string",
+            "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"
+        }
+    }
+}

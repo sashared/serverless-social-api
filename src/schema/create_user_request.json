@@ -1,0 +1,30 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Create User Schema",
+    "type": "object",
+    "required": [
+        "name", 
+        "email",
+        "address"
+    ],
+    "properties": {
+        "name": {
+            "description": "The name of the user",
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100
+        },
+        "email": {
+            "description": "The email of the user",
+            "type": "string",
+            "format": "email"             
+        },
+        "address": {
+            "description": "The address of the user as plain string",
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 100
+        }
+    }
+      
+}

@@ -1,0 +1,21 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Delete Post Schema",
+    "type": "object",
+    "required": [
+        "user_uuid", 
+        "post_id"
+    ],
+    "properties": {
+        "user_uuid": {
+            "description": "UUID of the user that created the post",
+            "type": "string",
+            "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"            
+        },
+        "post_id": {
+            "description": "UUID of the post to delete",
+            "type": "string",
+            "pattern": "[0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}"            
+        }
+    }
+}

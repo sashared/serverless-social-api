@@ -1,0 +1,102 @@
+custom:
+  dynamodb:
+    userTable: ${self:service}-user-${self:provider.stage}
+    postTable: ${self:service}-post-${self:provider.stage}
+    userFollowingTable: ${self:service}-userFollowing-${self:provider.stage}
+
+service: user-service
+# app and org for use with dashboard.serverless.com
+app: serverless-social-api
+org: alekred
+
+frameworkVersion: '>=1.1.0 <2.0.0'
+
+provider:
+  name: aws
+  runtime: python3.8
+  region: us-east-2
+  stage: dev
+  environment:
+    DYNAMODB_USER_TABLE: ${self:custom.dynamodb.userTable}
+    DYNAMODB_POST_TABLE: ${self:custom.dynamodb.postTable}
+    DYNAMODB_USERFOLLOWING_TABLE: ${self:custom.dynamodb.userFollowingTable}
+
+functions:
+  create_user:
+    handler: src/functions/create_user.create_user
+    role: createUserRole
+    events:
+      - http:
+          path: create_user
+          method: post
+          request:
+            schema:
+              application/json: ${file(src/schema/create_user_request.json)}
+  follow_user:
+    handler: src/functions/follow_user.follow_user
+    role: followUserRole
+    events:
+      - http:
+          path: follow_user
+          method: post
+          request:
+            schema:
+              application/json: ${file(src/schema/follow_user_request.json)}
+  unfollow_user:
+    handler: src/functions/unfollow_user.unfollow_user
+    role: unfollowUserRole
+    events:
+      - http:
+          path: unfollow_user
+          method: post
+          request:
+            schema:
+              application/json: ${file(src/schema/unfollow_user_request.json)}
+  get_followed_users_list:
+    handler: src/functions/get_followed_users_list.get_followed_users_list
+    role: getFollowedUsersListRole
+    events:
+      - http:
+          path: get_followed_users_list/{user_uuid}
+          method: get
+  create_post:
+    handler: src/functions/create_post.create_post
+    role: createPostRole
+    events:
+      - http:
+          path: create_post
+          method: post
+          request:
+            schema:
+              application/json: ${file(src/schema/create_post_request.json)}
+  delete_post:
+    handler: src/functions/delete_post.delete_post
+    role: deletePostRole
+    events:
+      - http:
+          path: delete_post
+          method: delete
+          request:
+            schema:
+              application/json: ${file(src/schema/delete_post_request.json)}
+  get_followed_user_posts:
+    handler: src/functions/get_followed_user_posts.get_followed_user_posts
+    role: getFollowedUserPostsRole
+    events:
+      - http:
+          path: get_followed_user_posts/{user_uuid}
+          method: get
+
+resources:
+  - ${file(resources/roles.yml)}
+  - ${file(resources/dynamodb.yml)}
+  - Resources:
+      gatewayResponseBadRequestBody:
+        Type: 'AWS::ApiGateway::GatewayResponse'
+        Properties:
+          RestApiId: 
+            Ref: 'ApiGatewayRestApi'
+          ResponseType: BAD_REQUEST_BODY
+          ResponseTemplates:
+            application/json: '{\"message\":\"$context.error.validationErrorString}\"}'
+        
